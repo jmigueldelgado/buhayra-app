@@ -23,14 +23,14 @@ server <- function(input, output, session) {
                                      bbox='36,-9,40,-6')) %>%
           addScaleBar(position = "topleft")
       })
-
-  output$mymap <- renderLeaflet({
-    leaflet() %>%
-      addProviderTiles(providers$Stamen.TonerLite,
-        options = providerTileOptions(noWrap = TRUE)
-      ) %>%
-      addMarkers(data = points())
-  })
+  #
+  # output$mymap <- renderLeaflet({
+  #   leaflet() %>%
+  #     addProviderTiles(providers$Stamen.TonerLite,
+  #       options = providerTileOptions(noWrap = TRUE)
+  #     ) %>%
+  #     addMarkers(data = points())
+  # })
 }
       #
       # # show reservoir information ####
