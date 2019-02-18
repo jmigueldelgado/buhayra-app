@@ -9,7 +9,7 @@ server <- function(input, output, session) {
   # }, ignoreNULL = FALSE)
 
       output$mymap4 <- renderLeaflet({
-        leaflet() %>% #addTiles() %>%
+        leaflet() %>%
           addProviderTiles(providers$CartoDB.Positron) %>%
           setView(-8,38, zoom=7) %>%
           addWMSTiles(
@@ -19,10 +19,19 @@ server <- function(input, output, session) {
             options = WMSTileOptions(format = "image/png",
                                      transparent = TRUE,
                                      version='1.3.0',
-                                     srs='EPSG:4326')) %>%
+                                     srs='EPSG:4326',
+                                     bbox='36,-9,40,-6')) %>%
           addScaleBar(position = "topleft")
       })
 
+  output$mymap <- renderLeaflet({
+    leaflet() %>%
+      addProviderTiles(providers$Stamen.TonerLite,
+        options = providerTileOptions(noWrap = TRUE)
+      ) %>%
+      addMarkers(data = points())
+  })
+}
       #
       # # show reservoir information ####
       # observeEvent(input$mymap4_click, {
