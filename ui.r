@@ -3,7 +3,8 @@ library(leaflet)
 library(dplyr)
 
 header <- dashboardHeader(
-  title = "Twin Cities Buses"
+    title = 'Albufeiras em Tempo Real - Demonstração',
+    titleWidth = 800
 )
 
 
@@ -12,24 +13,17 @@ body <- dashboardBody(
     column(width = 9,
       box(width = NULL, solidHeader = TRUE,
         leafletOutput("mymap", height = 500)
-      ),
-      box(width = NULL,
-        uiOutput("numVehiclesTable")
-      )
-),
+      )),
     column(width = 3,
       box(width = NULL, status = "warning",
-        uiOutput("routeSelect"),
-        checkboxGroupInput("directions", "Show",
+        checkboxGroupInput("datasets", "Mostrar",
           choices = c(
-            Northbound = 4,
-            Southbound = 1,
-            Eastbound = 2,
-            Westbound = 3
+            `Referência (JRC, dados estáticos)` = 1,
+            `buhayra/Sentinel-1` = 2
           ),
-          selected = c(1, 2, 3, 4)
-)
-)
+          selected = c(1, 2)
+          ),
+        plotOutput("plot"))
 )
 )
 )
@@ -39,15 +33,3 @@ dashboardPage(
   dashboardSidebar(disable = TRUE),
   body
 )
-
-
-# ui <- pageWithSidebar(
-#   headerPanel('Buhayra app for Alentejo'),
-#   sidebarPanel(
-#     selectInput('xcol', 'X Variable', c(1,2,3)),
-#   mainPanel(
-#     leafletOutput("mymap")
-#   )
-# ))
-
-# ui <- fluidPage(leafletOutput("mymap"),p())
