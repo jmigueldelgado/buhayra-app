@@ -9,7 +9,7 @@ function(input, output, session) {
 
 
   output$routeSelect <- renderUI({
-    routeNums <- c('a','b','c')
+    routeNums <- c('a','b','c','d')
     # Add names, so that we can add all=0
     names(routeNums) <- routeNums
     routeNums <- c(All = 0, routeNums)
@@ -33,6 +33,8 @@ function(input, output, session) {
                                      transparent = TRUE,
                                      version='1.3.0',
                                      srs='EPSG:4326'))
+
+              })
 #           addWMSTiles(
 #            "http://141.89.96.184/latestwms",
 #             layers = "watermask-sib",

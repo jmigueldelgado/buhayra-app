@@ -32,6 +32,7 @@ body <- dashboardBody(
 )
 )
 )
+)
 
 dashboardPage(
   header,
