@@ -13,7 +13,7 @@ function(input, output, session) {
         activelayers <- filter(wms_layers,id %in% as.numeric(input$datasets)) %>% pull(layer)
         
         leaflet() %>%
-            addProviderTiles(providers$CartoDB.Positron) %>%
+            addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
             setView(-8,38, zoom=7) %>%
             addWMSTiles(
                 "http://141.89.96.184/latestwms",

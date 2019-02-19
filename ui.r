@@ -23,6 +23,10 @@ body <- dashboardBody(
           ),
           selected = c(1, 2)
           ),
+        p(
+            class = "text-muted",
+            paste("Clique sobre uma albufeira para consultar a série temporal")
+        ),
         plotOutput("plot"))
 )
 )
