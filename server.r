@@ -39,7 +39,7 @@ function(input, output, session) {
         output$plot <- renderPlot({
             ggplot(ts) +
                 geom_point(aes(x=ingestion_time,y=area/10000)) +
-                scale_y_continuous(limits=c(0,1.1*max(ts$ref_area)/10000)) +
+                scale_y_continuous(limits=c(0,1.1*max(ts$area[1])/10000)) +
                 geom_hline(yintercept=ts$ref_area[1]/10000,linetype='dashed',color='orange') +
                 xlab("Data de Aquisição") +
                 ylab("Área [ha]")
