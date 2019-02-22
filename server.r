@@ -56,18 +56,26 @@ function(input, output, session) {
         }
         else
         {
-            text <- paste0("Área do Espelho de Água: ",
-                           ts %>%
-                           filter(ingestion_time == max(ingestion_time)) %>%
-                           mutate(area=round(area/10000, digits = 1)) %>%
-                           pull(area),
-                           " ha",
-                           "<br>",
-                           "Data e Hora de Aquisição: ",
-                           strptime(max(ts$ingestion_time),"%Y-%m-%d %H:%M:%S"),
-                           "<br>",
-                           "ID: ",
-                           ts$id_jrc[1])
+            return_click = ts %>%
+                mutate(area=round(area/10000, digits = 1)) %>%
+                filter(area>0) %>%
+                filter(ingestion_time == max(ingestion_time))
+
+            if(nrow(return_click)==0)
+            {
+                text = "Albufeira vazia ou indisponível"
+            } else
+            {
+                text <- paste0("Área do Espelho de Água: ",
+                               return_click$area[1],
+                               " ha",
+                               "<br>",
+                               "Data e Hora de Aquisição: ",
+                               strptime(return_click$ingestion_time[1],"%Y-%m-%d %H:%M:%S"),
+                               "<br>",
+                               "ID: ",
+                               return_click$id_jrc[1])
+             }
             leafletProxy("mymap") %>%
                 clearPopups() %>%
                 addPopups(click$lng, click$lat, text)
