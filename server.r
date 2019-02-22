@@ -44,8 +44,7 @@ function(input, output, session) {
         if(nrow(return_click) == 0)
         {
             text <- "Albufeira vazia ou indisponível" #required info
-        }
-        else
+        } else
         {
             text <- paste0("Área do Espelho de Água: ",
                            return_click$area[1],
@@ -64,7 +63,7 @@ function(input, output, session) {
         output$plot <- renderPlot({
             ggplot(ts) +
                 geom_point(aes(x=ingestion_time,y=area/10000)) +
-                scale_y_continuous(limits=c(0,1.1*max(c(ts$area,ts$ref_area[1])/10000)) +
+                scale_y_continuous(limits=c(0,1.1*max(c(ts$area,ts$ref_area[1])/10000))) +
                 geom_hline(yintercept=ts$ref_area[1]/10000,linetype='dashed',color='orange') +
                 xlab("Data de Aquisição") +
                 ylab("Área [ha]")
