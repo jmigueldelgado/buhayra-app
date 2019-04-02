@@ -24,16 +24,17 @@ function(input, output, session) {
                                          srs='EPSG:4326')) %>%
             addScaleBar(position = "topleft")
     })
-
+    # click=list()
+    # click$lng=-7.912301
+    # click$lat=37.971707
     observeEvent(input$mymap_click,
     {
         click <- input$mymap_click
-
         source("/srv/shiny-server/buhayra-app/pw.R")
         drv <- dbDriver("PostgreSQL")
         con <- dbConnect(drv, dbname='watermasks', host = "localhost", port = 5432, user = "sar2water", password = pw)
         rm(pw)
-        ts <- dbGetQuery(con, paste0("SELECT jrc_sib.id_jrc, ST_area(ST_Transform(jrc_sib.geom,32629)) as ref_area,sib.area,sib.ingestion_time FROM jrc_sib RIGHT JOIN sib ON jrc_sib.id_jrc=sib.id_jrc WHERE ST_Contains(jrc_sib.geom, ST_SetSRID(ST_Point(",click$lng,",",click$lat,"),4326))"))
+        ts <- dbGetQuery(con, paste0("SELECT jrc_sib.id_jrc, ST_area(ST_Transform(jrc_sib.geom,32629)) as ref_area,sib.area,sib.ingestion_time,sib.source_id FROM jrc_sib RIGHT JOIN sib ON jrc_sib.id_jrc=sib.id_jrc WHERE ST_Contains(jrc_sib.geom, ST_SetSRID(ST_Point(",click$lng,",",click$lat,"),4326))"))
         dbDisconnect(conn = con)
 
         return_click = ts %>%
