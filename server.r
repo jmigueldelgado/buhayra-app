@@ -34,13 +34,12 @@ function(input, output, session) {
         drv <- dbDriver("PostgreSQL")
         con <- dbConnect(drv, dbname='watermasks', host = "localhost", port = 5432, user = "sar2water", password = pw)
         rm(pw)
-        ts <- dbGetQuery(con, paste0("SELECT jrc_sib.id_jrc, ST_area(ST_Transform(jrc_sib.geom,32629)) as ref_area,sib.area,sib.ingestion_time,sib.source_id FROM jrc_sib RIGHT JOIN sib ON jrc_sib.id_jrc=sib.id_jrc WHERE ST_Contains(jrc_sib.geom, ST_SetSRID(ST_Point(",click$lng,",",click$lat,"),4326))"))
+        ts <- dbGetQuery(con, paste0("SELECT jrc_sib.id_jrc, ST_area(ST_Transform(jrc_sib.geom,32629)) as ref_area,sib.area,sib.ingestion_time,sib.source_id,scene_sib.mission_id,scene_sib.pass FROM jrc_sib RIGHT JOIN sib ON jrc_sib.id_jrc=sib.id_jrc RIGHT JOIN scene_sib ON sib.ingestion_time = scene_sib.ingestion_time WHERE ST_Contains(jrc_sib.geom, ST_SetSRID(ST_Point(",click$lng,",",click$lat,"),4326))"))
         dbDisconnect(conn = con)
-
 
         output$plot <- renderPlot({
             ggplot(ts) +
-                geom_point(aes(x=ingestion_time,y=area/10000)) +
+                geom_point(aes(x=ingestion_time,y=area/10000,color=mission_id,shape=pass)) +
                 scale_y_continuous(limits=c(0,1.1*max(ts$ref_area)/10000)) +
                 geom_hline(yintercept=ts$ref_area[1]/10000,linetype='dashed',color='orange') +
                 xlab("Data de Aquisição") +
