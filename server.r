@@ -37,38 +37,44 @@ function(input, output, session) {
         ts <- dbGetQuery(con, paste0("SELECT jrc_sib.id_jrc, ST_area(ST_Transform(jrc_sib.geom,32629)) as ref_area,sib.area,sib.ingestion_time,sib.source_id FROM jrc_sib RIGHT JOIN sib ON jrc_sib.id_jrc=sib.id_jrc WHERE ST_Contains(jrc_sib.geom, ST_SetSRID(ST_Point(",click$lng,",",click$lat,"),4326))"))
         dbDisconnect(conn = con)
 
-        return_click = ts %>%
-            mutate(area=round(area/10000, digits = 1)) %>%
-            filter(area>0) %>%
-            filter(ingestion_time == max(ingestion_time))
-
-        if(nrow(return_click) == 0)
-        {
-            text <- "Albufeira vazia ou indisponível" #required info
-        } else
-        {
-            text <- paste0("Área do Espelho de Água: ",
-                           return_click$area[1],
-                           " ha",
-                           "<br>",
-                           "Data e Hora de Aquisição: ",
-                           strptime(return_click$ingestion_time[1],"%Y-%m-%d %H:%M:%S"),
-                           "<br>",
-                           "ID: ",
-                           return_click$id_jrc[1])
-        }
-        leafletProxy("mymap") %>%
-            clearPopups() %>%
-            addPopups(click$lng, click$lat, text)
 
         output$plot <- renderPlot({
             ggplot(ts) +
-                geom_point(aes(x=ingestion_time,y=area/10000,color=source_id)) +
-                scale_y_continuous(limits=c(0,1.1*max(c(ts$area,ts$ref_area[1])/10000))) +
+                geom_point(aes(x=ingestion_time,y=area/10000)) +
+                scale_y_continuous(limits=c(0,1.1*max(ts$ref_area)/10000)) +
                 geom_hline(yintercept=ts$ref_area[1]/10000,linetype='dashed',color='orange') +
                 xlab("Data de Aquisição") +
                 ylab("Área [ha]")
-            })
+        })
+
+
+        if(nrow(ts) == 0)
+        {
+            text <- "Albufeira vazia ou indisponível" #required info
+            leafletProxy("mymap") %>%
+                clearPopups() %>%
+                addPopups(click$lng, click$lat, text)
+        }
+        else
+        {
+            text <- paste0("Área do Espelho de Água: ",
+                           ts %>%
+                           filter(ingestion_time == max(ingestion_time)) %>%
+                           mutate(area=round(area/10000, digits = 1)) %>%
+                           pull(area),
+                           " ha",
+                           "<br>",
+                           "Data e Hora de Aquisição: ",
+                           strptime(max(ts$ingestion_time),"%Y-%m-%d %H:%M:%S"),
+                           "<br>",
+                           "ID: ",
+                           ts$id_jrc[1])
+            leafletProxy("mymap") %>%
+                clearPopups() %>%
+                addPopups(click$lng, click$lat, text)
+        }
+
+
     })
 
 
