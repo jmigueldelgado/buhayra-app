@@ -38,7 +38,9 @@ function(input, output, session) {
         dbDisconnect(conn = con)
 
         output$plot <- renderPlot({
-            ggplot(ts) +
+            ts %>%
+              filter(area>0) %>%
+              ggplot +
                 geom_point(aes(x=ingestion_time,y=area/10000,color=mission_id,shape=pass)) +
                 scale_y_continuous(limits=c(0,1.1*max(ts$ref_area)/10000)) +
                 geom_hline(yintercept=ts$ref_area[1]/10000,linetype='dashed',color='orange') +
@@ -58,6 +60,7 @@ function(input, output, session) {
         {
             text <- paste0("Área do Espelho de Água: ",
                            ts %>%
+                           filter(area>0) %>%
                            filter(ingestion_time == max(ingestion_time)) %>%
                            mutate(area=round(area/10000, digits = 1)) %>%
                            pull(area),
