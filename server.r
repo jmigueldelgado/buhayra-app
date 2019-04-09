@@ -45,7 +45,8 @@ function(input, output, session) {
                 scale_y_continuous(limits=c(0,1.1*max(ts$ref_area)/10000)) +
                 geom_hline(yintercept=ts$ref_area[1]/10000,linetype='dashed',color='orange') +
                 xlab("Data de Aquisição") +
-                ylab("Área [ha]")
+                ylab("Área [ha]") +
+                theme(legend.position='bottom')
         })
 
 
