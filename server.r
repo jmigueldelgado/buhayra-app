@@ -32,7 +32,7 @@ function(input, output, session) {
         click <- input$mymap_click
         source("/srv/shiny-server/buhayra-app/pw.R")
         drv <- dbDriver("PostgreSQL")
-        con <- dbConnect(drv, dbname='watermasks', host = "localhost", port = 5432, user = "sar2water", password = pw)
+        con <- dbConnect(drv, dbname='watermasks', host = hostname, port = 5432, user = "sar2water", password = pw)
         rm(pw)
         ts <- dbGetQuery(con, paste0("SELECT jrc_sib.id_jrc, ST_area(ST_Transform(jrc_sib.geom,32629)) as ref_area,sib.area,sib.ingestion_time,sib.source_id,scene_sib.mission_id,scene_sib.pass FROM jrc_sib RIGHT JOIN sib ON jrc_sib.id_jrc=sib.id_jrc RIGHT JOIN scene_sib ON sib.ingestion_time = scene_sib.ingestion_time WHERE ST_Contains(jrc_sib.geom, ST_SetSRID(ST_Point(",click$lng,",",click$lat,"),4326))"))
         dbDisconnect(conn = con)
