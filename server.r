@@ -12,6 +12,8 @@ function(input, output, session) {
     output$mymap <- renderLeaflet({
         activelayers <- filter(wms_layers,id %in% as.numeric(input$datasets)) %>% pull(layer)
 
+        source("/srv/shiny-server/buhayra-app/pw.R")
+
         leaflet() %>%
             addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
             setView(-8,38, zoom=7) %>%
