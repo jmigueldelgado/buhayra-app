@@ -16,7 +16,7 @@ function(input, output, session) {
             addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
             setView(-8,38, zoom=7) %>%
             addWMSTiles(
-                "http://141.89.96.193/latestwms",
+                paste0("http://",hostname,"/latestwms"),
                 layers = activelayers,
                 options = WMSTileOptions(format = "image/png",
                                          transparent = TRUE,
