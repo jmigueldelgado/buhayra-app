@@ -16,7 +16,7 @@ function(input, output, session) {
 
         leaflet() %>%
             addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
-            setView(-8,38, zoom=7) %>%
+            setView(-36,-5.5, zoom=7) %>%
             addWMSTiles(
                 paste0("http://",hostname,"/latestwms"),
                 layers = activelayers,
