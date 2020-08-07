@@ -4,11 +4,13 @@ library(dplyr)
 library(RPostgreSQL)
 library(ggplot2)
 
+
 function(input, output, session) {
     # define available layers
-    wms_layers <- data.frame(layer=c("JRC-Global-Water-Bodies-demo", "watermask-demo"),id=c(1,2)) %>% mutate(layer=as.character(layer))
+    wms_layers <- data.frame(layer=c("JRC-Global-Water-Bodies", "watermask"),id=c(1,2)) %>% mutate(layer=as.character(layer))
+#    wms_layers <- data.frame(layer=c("JRC-Global-Water-Bodies"),id=c(1)) %>% mutate(layer=as.character(layer))
 
-
+    
     output$mymap <- renderLeaflet({
         activelayers <- filter(wms_layers,id %in% as.numeric(input$datasets)) %>% pull(layer)
 
