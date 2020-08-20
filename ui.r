@@ -2,6 +2,8 @@ library(shinydashboard)
 library(leaflet)
 library(dplyr)
 
+#shiny::includeCSS('/srv/shiny-server/buhayra-app/www/cursor.css')
+
 header <- dashboardHeader(
     title = 'Albufeiras em Tempo Real - Demonstração',
     titleWidth = 800
