@@ -5,7 +5,7 @@ library(dplyr)
 #shiny::includeCSS('/srv/shiny-server/buhayra-app/www/cursor.css')
 
 csscode <- HTML("
-#messagebutton {
+#mymap {
   cursor: auto !important;
 }"
 )
@@ -16,9 +16,8 @@ header <- dashboardHeader(
 )
 
 
-body <- dashboardBody(
+body <- dashboardBody(tags$style(csscode),
   fluidRow(
-    tags$style(csscode),
     column(width = 9,
       box(width = NULL, solidHeader = TRUE,
         leafletOutput("mymap", height = 500)
