@@ -23,7 +23,7 @@ body <- dashboardBody(
             `Referência (JRC, dados estáticos)` = 1,
             `buhayra/Sentinel-1` = 2
           ),
-          selected = c(1, 2)
+          selected = c(1,2)
           ),
         p(
             class = "text-muted",
