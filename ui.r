@@ -4,6 +4,12 @@ library(dplyr)
 
 #shiny::includeCSS('/srv/shiny-server/buhayra-app/www/cursor.css')
 
+csscode <- HTML("
+#messagebutton {
+  cursor: auto !important;
+}"
+)
+
 header <- dashboardHeader(
     title = 'Albufeiras em Tempo Real - Demonstração',
     titleWidth = 800
@@ -12,6 +18,7 @@ header <- dashboardHeader(
 
 body <- dashboardBody(
   fluidRow(
+    tags$style(csscode),
     column(width = 9,
       box(width = NULL, solidHeader = TRUE,
         leafletOutput("mymap", height = 500)

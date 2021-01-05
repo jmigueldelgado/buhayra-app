@@ -9,11 +9,12 @@ function(input, output, session) {
     # define available layers
     wms_layers <- data.frame(layer=c("watermask","JRC-Global-Water-Bodies"),id=c(1,2)) %>% mutate(layer=as.character(layer))
 
-    
+
     output$mymap <- renderLeaflet({
         activelayers <- filter(wms_layers,id %in% as.numeric(input$datasets)) %>% pull(layer)
 
         source("/srv/shiny-server/buhayra-app/pw.R")
+#        source("pw.R")
 
         leaflet() %>%
             addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
@@ -27,6 +28,7 @@ function(input, output, session) {
                                          srs='EPSG:4326')) %>%
             addScaleBar(position = "topleft")
     })
+
     observeEvent(input$mymap_click,
     {
         click <- input$mymap_click
@@ -63,7 +65,7 @@ function(input, output, session) {
                 dplyr::select(`area [ha]`,ingestion_time) %>%
                 distinct(ingestion_time,.keep_all=TRUE) %>%
                 arrange(desc(ingestion_time)) %>%
-                slice(1:3) %>% 
+                slice(1:3) %>%
                 knitr::kable(.,"html") %>%
                 kableExtra::kable_styling())
             #text <- paste0("Área do Espelho de Água: ",ts
