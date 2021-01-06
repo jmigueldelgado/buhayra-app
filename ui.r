@@ -1,56 +1,43 @@
-library(shinydashboard)
 library(leaflet)
 library(dplyr)
 
-#shiny::includeCSS('/srv/shiny-server/buhayra-app/www/cursor.css')
+# define primary elements of dashboard
 
-csscode <- HTML("
-#mymap {
-  cursor: auto !important;
-}"
-)
+map=leafletOutput("mymap", height="100%", width="100%")
 
-navbarPage("Reservoirs in real time", id="nav",
+vars=c('Watermasks and Static Water Bodies','Only Watermasks')
 
-  tabPanel("Interactive map",
-    div(class="outer",
-
-      # tags$head(
-      #   # Include our custom CSS
-      #   includeCSS("styles.css"),
-      #   includeScript("gomap.js")
-      # ),
-
-      # If not using custom CSS, set height of leafletOutput to a number instead of percent
-      leafletOutput("mymap", width="100%", height="100%"),
-
-      # Shiny versions prior to 0.11 should use class = "modal" instead.
-      absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+panel1 = absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
         draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
         width = 330, height = "auto",
-
-        h2("Municipalities"),
-
-        # selectInput("color", "Color", vars),
-        # selectInput("size", "Size", vars, selected = "adultpop"),
-        # conditionalPanel("input.color == 'superzip' || input.size == 'superzip'",
-        #   # Only prompt for threshold when coloring or sizing by superzip
-        #   numericInput("threshold", "SuperZIP threshold (top n percentile)", 5)
-        # ),
-
-        # plotOutput("histCentile", height = 200),
-        plotOutput("plot", height = 250)
-      ),
-
-      # tags$div(id="cite",
-      #   'Data compiled for ', tags$em('Coming Apart: The State of White America, 1960–2010'), ' by Charles Murray (Crown Forum, 2012).'
-      # )
-    )
-  ),
+        h2("Water storage dynamics"),
+        p("Click on a reservoir to obtain a time-series"),
+        selectInput("datasets", "Datasets", vars),
+        plotOutput('tsVol'),
+        textOutput("selected_var")
+        )
 
 
-  conditionalPanel("false", icon("crosshair"))
+division1 = div(class="outer",tags$head(includeCSS('styles.css')),map,panel1)
+
+tab1=tabPanel("Interactive map", division1)
+tab2=tabPanel("Component 2")
+tab3=tabPanel("Component 3")
+
+
+navbarPage(
+  "Reservoirs in real time",id="nav",
+  tab1
+#  tab2,
+#  tab3
 )
+
+
+    
+#ui <- fluidPage(leafletOutput("mymap"),p(), actionButton("recalc", "New points"))
+
+
+
 #
 #   fluidRow(
 #     column(width = 9,
