@@ -5,7 +5,7 @@ library(dplyr)
 
 map=leafletOutput("mymap", height="100%", width="100%")
 
-vars=c('Watermasks and Static Water Bodies','Only Watermasks')
+vars=c('Watermasks and Static Water Bodies','Only Watermasks','Aggregate on Municipalities')
 
 panel1 = absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
         draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",

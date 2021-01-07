@@ -2,26 +2,47 @@ library(leaflet)
 library(dplyr)
 library(RPostgreSQL)
 library(ggplot2)
+library(sf)
+
+
 
 function(input, output, session) {
 
 
-    wms_layers <- list('Watermasks and Static Water Bodies'=c("watermask","JRC-Global-Water-Bodies"),'Only Watermasks'=c('watermask'))
-    source("/srv/shiny-server/buhayra-app/pw.R")
+    municipios=st_read('data/municipios_ce_simple.geojson') %>% mutate(pop=as.numeric(as.character(Pop_Est_17)))
 
+    bins <- c(0, 1000, 2000, 5000, 10000, 20000, 50000, 100000, Inf)
+    pal <- colorBin("YlOrRd", domain = municipios$pop, bins = bins)
+
+
+    wms_layers <- list('Watermasks and Static Water Bodies'=c("watermask","JRC-Global-Water-Bodies"),'Only Watermasks'=c('watermask'),'Aggregate on Municipalities'=c("watermask","JRC-Global-Water-Bodies"))
+
+    source("/srv/shiny-server/buhayra-app/pw.R")
+    geojson = jsonlite::fromJSON('data/municipios_ce_simple.geojson')
+    
     output$mymap <- renderLeaflet({
         active_layers  <- wms_layers[[input$datasets]]
 
-        leaflet() %>%
+        map = leaflet(municipios) %>%
             addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
             setView(-38.5,-5.3, zoom=12) %>%
             addWMSTiles(paste0("http://",mapserver_host,"/latestwms"),
-                layers = active_layers,
-                options = WMSTileOptions(format = "image/png",
-                                         transparent = TRUE,
-                                         version='1.3.0',
-                                         srs='EPSG:4326')) %>%
+                        layers = active_layers,
+                        options = WMSTileOptions(format = "image/png",
+                                                 transparent = TRUE,
+                                                 version='1.3.0',
+                                                 srs='EPSG:4326')) %>%
             addScaleBar(position = "topleft")
+
+        if(input$datasets == names(wms_layers)[3] {
+        
+            map %>% addPolygons(fillColor = ~pal(pop),
+                                weight = 2,
+                                opacity = 1,
+                                color = "white",
+                                dashArray = "3",
+                                fillOpacity = 0.7)
+        } else {map}
     })
 
 
