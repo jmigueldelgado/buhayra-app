@@ -9,10 +9,12 @@ function(input, output, session) {
     wms_layers <- list('Watermasks and Static Water Bodies'=c("watermask","JRC-Global-Water-Bodies"),'Only Watermasks'=c('watermask'))
     source("/srv/shiny-server/buhayra-app/pw.R")
 
+#    municipios <- rgdal::readOGR("data/municipios_ce.geojson")
+
     output$mymap <- renderLeaflet({
         active_layers  <- wms_layers[[input$datasets]]
 
-        leaflet() %>%
+        map = leaflet() %>%
             addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
             setView(-38.5,-5.3, zoom=12) %>%
             addWMSTiles(paste0("http://",mapserver_host,"/latestwms"),
@@ -22,6 +24,9 @@ function(input, output, session) {
                                          version='1.3.0',
                                          srs='EPSG:4326')) %>%
             addScaleBar(position = "topleft")
+
+        
+        
     })
 
 
@@ -38,7 +43,7 @@ function(input, output, session) {
 
             if(nrow(ts) == 0)
             {
-                text <- "Albufeira vazia ou indisponível" #required info
+                text <- "Unable to find a reservoir on this location." #required info
                 leafletProxy("mymap") %>%
                     clearPopups() %>%
                     addPopups(click$lng, click$lat, text)
@@ -52,8 +57,8 @@ function(input, output, session) {
                         geom_point(aes(x=ingestion_time,y=area/10000,color=mission_id,shape=pass)) +
                         scale_y_continuous(limits=c(0,1.1*max(ts$ref_area)/10000)) +
                         geom_hline(yintercept=ts$ref_area[1]/10000,linetype='dashed',color='orange') +
-                        xlab("Data de Aquisição") +
-                        ylab("Área [ha]") +
+                        xlab("Acquisition date") +
+                        ylab("Area [ha]") +
                         theme(legend.position='bottom')
                 })
                 
@@ -71,7 +76,7 @@ function(input, output, session) {
             }
         })
     
-    output$selected_var <- renderText({
-        wms_layers[[input$datasets]]
+#    output$selected_var <- renderText({
+#        wms_layers[[input$datasets]]
     })
 }
