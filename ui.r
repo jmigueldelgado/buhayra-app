@@ -13,8 +13,8 @@ panel1 = absolutePanel(id = "controls", class = "panel panel-default", fixed = T
         h2("Water storage dynamics"),
         p("Click on a reservoir to obtain a time-series"),
         selectInput("datasets", "Datasets", vars),
-        plotOutput('tsVol'),
-        textOutput("selected_var")
+        plotOutput('tsVol')
+#        textOutput("selected_var")
         )
 
 
