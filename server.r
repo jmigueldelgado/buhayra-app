@@ -38,7 +38,7 @@ function(input, output, session) {
 
             if(nrow(ts) == 0)
             {
-                text <- "Albufeira vazia ou indisponível" #required info
+                text <- "Unable to find a reservoir on this location" #required info
                 leafletProxy("mymap") %>%
                     clearPopups() %>%
                     addPopups(click$lng, click$lat, text)
@@ -52,8 +52,8 @@ function(input, output, session) {
                         geom_point(aes(x=ingestion_time,y=area/10000,color=mission_id,shape=pass)) +
                         scale_y_continuous(limits=c(0,1.1*max(ts$ref_area)/10000)) +
                         geom_hline(yintercept=ts$ref_area[1]/10000,linetype='dashed',color='orange') +
-                        xlab("Data de Aquisição") +
-                        ylab("Área [ha]") +
+                        xlab("Acquisition Date") +
+                        ylab("Area [ha]") +
                         theme(legend.position='bottom')
                 })
                 
