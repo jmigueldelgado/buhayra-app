@@ -110,8 +110,23 @@ function(input, output, session) {
     observeEvent(input$mymap_shape_click,
     {
         ts = query_on_sf( municipios %>% filter(CD_GEOCMU==input$mymap_shape_click$id))
+        #ts = query_on_sf( municipios %>% filter(CD_GEOCMU==2308708))
         
-    })
+        if(nrow(ts) == 0)
+        {
+            text <- "Unable to find a reservoir on this location" #required info
+            leafletProxy("mymap") %>%
+                clearPopups() %>%
+                addPopups(input$mymap_shape_click$lng, input$mymap_shape_click$lat, text)
+        }
+            else
+        {
+            output$tsVol <- renderPlot({
+                plot_aggregated_ts(ts)
+            })
+        }
+            
+    }) # end of observer event shape click
     
     output$selected_var <- renderText({  
     input$mymap_shape_click$id    
