@@ -57,6 +57,7 @@ plot_aggregated_ts  <- function(ts) {
         geom_point(aes(x=`Acquisition Date`,y=`Total Area [ha]`/10000,color=Mission)) +
         scale_y_continuous(limits=c(0,1.1*ts_crunched$`Reference Area`[1]/10000)) +
         geom_hline(yintercept=ts_crunched$`Reference Area`[1]/10000,linetype='dashed',color='orange') +
+        ylab("Total Area [ha]") +
         theme(legend.position='bottom')
     return(plt)
 }
