@@ -48,9 +48,11 @@ function(input, output, session) {
             "<strong>%s</strong><br/>%g people",
             municipios$NM_MUNICIP, municipios$pop) %>%
             lapply(htmltools::HTML)
-
+        
+        
         if(input$municipios) {
             proxy %>% addPolygons(fillColor = ~pal(pop),
+                                  layerId=~CD_GEOCMU,
                                   weight = 2,
                                   opacity = 1,
                                   color = "white",
@@ -69,24 +71,14 @@ function(input, output, session) {
                                       direction = "auto"))
         }
     }) # end of observe addPolygons municipios
-    
-    output$selected_var <- renderText({
-        as.character(input$municipios)
-    })
 
-   
+    
     
     observeEvent(input$mymap_click,
     {
         if(!input$municipios) {
             click <- input$mymap_click
-                source("/srv/shiny-server/buhayra-app/pw.R")
-            drv <- dbDriver("PostgreSQL")
-            con <- dbConnect(drv, dbname='watermasks', host = db_host, port = 5432, user = "sar2water", password = pw)
-            rm(pw)
-            ts <- dbGetQuery(con, paste0("SELECT jrc_demo.id_jrc, ST_area(ST_Transform(jrc_demo.geom,32629)) as ref_area,demo.area,demo.ingestion_time,demo.source_id,scene_demo.mission_id,scene_demo.pass FROM jrc_demo RIGHT JOIN demo ON jrc_demo.id_jrc=demo.id_jrc RIGHT JOIN scene_demo ON demo.ingestion_time = scene_demo.ingestion_time WHERE ST_Contains(jrc_demo.geom, ST_SetSRID(ST_Point(",click$lng,",",click$lat,"),4326))"))
-            dbDisconnect(conn = con)
-            
+            ts = query_watermask(click)
             if(nrow(ts) == 0)
             {
                 text <- "Unable to find a reservoir on this location" #required info
@@ -97,15 +89,7 @@ function(input, output, session) {
             else
             {
                 output$tsVol <- renderPlot({
-                    ts %>%
-                        filter(area>0) %>%
-                        ggplot +
-                        geom_point(aes(x=ingestion_time,y=area/10000,color=mission_id,shape=pass)) +
-                        scale_y_continuous(limits=c(0,1.1*max(ts$ref_area)/10000)) +
-                        geom_hline(yintercept=ts$ref_area[1]/10000,linetype='dashed',color='orange') +
-                        xlab("Acquisition Date") +
-                        ylab("Area [ha]") +
-                        theme(legend.position='bottom')
+                    plot_watermask_ts(ts)
                 })
                 
                 text= paste0("ID: ",ts$id_jrc[1],"<br>",ts %>%
@@ -123,6 +107,15 @@ function(input, output, session) {
         }
     }) # end of observeEvent(input$mymap_click,
 
+    observeEvent(input$mymap_shape_click,
+    {
+        ts = query_on_sf( municipios %>% filter(CD_GEOCMU==input$mymap_shape_click$id))
+        
+    })
+    
+    output$selected_var <- renderText({  
+    input$mymap_shape_click$id    
+    })
      
 
 }
