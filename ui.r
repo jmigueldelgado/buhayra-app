@@ -5,16 +5,17 @@ library(dplyr)
 
 map=leafletOutput("mymap", height="100%", width="100%")
 
-vars=c('Watermasks and Static Water Bodies','Only Watermasks')
+#vars=c('Watermasks and Static Water Bodies','Only Watermasks')
+vars=c('None','Municipalities','Catchments')
 
 panel1 = absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
         draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
         width = 330, height = "auto",
         h2("Water storage dynamics"),
         p("Click on a reservoir or overlay to obtain a time-series"),
-        selectInput("datasets", "Datasets", vars),
+        selectInput("datasets", "Overlays", vars),
         plotOutput('tsVol'),
-        checkboxInput("municipios", "Overlay Municipalities", FALSE),
+#        checkboxInput("municipios", "Overlay Municipalities", FALSE),
         textOutput("selected_var")
         )
 

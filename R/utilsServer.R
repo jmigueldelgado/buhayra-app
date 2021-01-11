@@ -14,6 +14,11 @@ query_watermask  <- function(click){
     return(ts)
 }
 
+
+#pol=catchments %>% filter(ID==6121095870)
+#pol=municipios %>% filter(ID==2308708)
+
+
 query_on_sf  <- function(pol){
     source("/srv/shiny-server/buhayra-app/pw.R")
     drv <- dbDriver("PostgreSQL")

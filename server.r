@@ -8,20 +8,22 @@ library(sf)
 
 function(input, output, session) {
 
-
-    municipios=st_read('data/municipios_ce_simple.geojson') %>% mutate(pop=as.numeric(as.character(Pop_Est_17)))
-
+    load('data/municipios_ce_simple.RData')
+    municipios=municipios_ce_simple %>% mutate(pop=as.numeric(as.character(Pop_Est_17))) %>% rename(ID=CD_GEOCMU)
+    load('data/catchment_geometry_simple.RData')
+    catchments=catchment_geometry_simple %>% rename(ID=HYBAS_ID) %>% st_set_crs(st_crs(municipios))
     bins <- c(0, 1000, 2000, 5000, 10000, 20000, 50000, 100000, Inf)
     pal <- colorBin("YlOrRd", domain = municipios$pop, bins = bins)
 
+    
 
-    wms_layers <- list('Watermasks and Static Water Bodies'=c("watermask","JRC-Global-Water-Bodies"),'Only Watermasks'=c('watermask'))
-
+    wms_layers <- list('Watermasks and Static Water Bodies'=c("watermask","JRC-Global-Water-Bodies"))
+    overlay_layers <- list('Municipalities'=municipios,'Catchments'=catchments,'None'=NA)
+    
     source("/srv/shiny-server/buhayra-app/pw.R")
     
     output$mymap <- renderLeaflet({
-        active_layers  <- wms_layers[[input$datasets]]
-
+        active_layers  <- wms_layers[['Watermasks and Static Water Bodies']]
 
         map=leaflet() %>%
             addProviderTiles(providers$OpenStreetMap.Mapnik) %>%
@@ -34,25 +36,25 @@ function(input, output, session) {
                                                  srs='EPSG:4326')) %>%
             addScaleBar(position = "topleft")
         
-
-
+        
     }) # end of renderLeaflet
 
-    observe({
 
-        proxy = leafletProxy("mymap",data = municipios) %>%
-            clearPopups() %>%
-            clearShapes()
-        
-        labels <- sprintf(
-            "<strong>%s</strong><br/>%g people",
-            municipios$NM_MUNICIP, municipios$pop) %>%
-            lapply(htmltools::HTML)
-        
-        
-        if(input$municipios) {
+    observe({
+        if(input$datasets!='None') {
+            proxy = leafletProxy("mymap",data = overlay_layers[[input$datasets]]) %>%
+                                       clearPopups() %>%
+                                       clearShapes()
+        }
+
+        if(input$datasets=='Municipalities'){
+            labels <- sprintf(
+                "<strong>%s</strong><br/>%g people",
+                overlay_layers[[input$datasets]]$NM_MUNICIP, overlay_layers[[input$datasets]]$pop) %>%
+                lapply(htmltools::HTML)        
+            
             proxy %>% addPolygons(fillColor = ~pal(pop),
-                                  layerId=~CD_GEOCMU,
+                                  layerId=~ID,
                                   weight = 2,
                                   opacity = 1,
                                   color = "white",
@@ -70,13 +72,40 @@ function(input, output, session) {
                                       textsize = "15px",
                                       direction = "auto"))
         }
-    }) # end of observe addPolygons municipios
+
+        if(input$datasets=='Catchments'){
+            labels <- sprintf(
+                "<strong>%s</strong><br/>%g km2",
+                overlay_layers[[input$datasets]]$ID, overlay_layers[[input$datasets]]$SUB_AREA) %>%
+                lapply(htmltools::HTML)        
+            
+            proxy %>% addPolygons(layerId=~ID,
+                                  weight = 2,
+                                  opacity = 1,
+                                  color = "white",
+                                  dashArray = "3",
+                                  fillOpacity = 0.7,
+                                  highlight = highlightOptions(
+                                      weight = 5,
+                                      color = "#666",
+                                      dashArray = "",
+                                      fillOpacity = 0.7,
+                                      bringToFront = TRUE),
+                                  label = labels,
+                                  labelOptions = labelOptions(
+                                      style = list("font-weight" = "normal", padding = "3px 8px"),
+                                      textsize = "15px",
+                                      direction = "auto"))
+            
+        }
+    })
+                 
 
     
     
     observeEvent(input$mymap_click,
     {
-        if(!input$municipios) {
+        if(input$datasets=='None') {
             click <- input$mymap_click
             ts = query_watermask(click)
             if(nrow(ts) == 0)
@@ -109,9 +138,7 @@ function(input, output, session) {
 
     observeEvent(input$mymap_shape_click,
     {
-        ts = query_on_sf( municipios %>% filter(CD_GEOCMU==input$mymap_shape_click$id))
-        #ts = query_on_sf( municipios %>% filter(CD_GEOCMU==2308708))
-        
+        ts = query_on_sf( overlay_layers[[input$datasets]] %>% filter(ID==input$mymap_shape_click$id))        
         if(nrow(ts) == 0)
         {
             text <- "Unable to find a reservoir on this location" #required info
@@ -129,7 +156,7 @@ function(input, output, session) {
     }) # end of observer event shape click
     
     output$selected_var <- renderText({  
-    input$mymap_shape_click$id    
+        input$mymap_shape_click$id
     })
      
 
