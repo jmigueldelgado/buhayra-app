@@ -17,6 +17,7 @@ query_watermask  <- function(click){
 
 #pol=catchments %>% filter(ID==6121095870)
 #pol=municipios %>% filter(ID==2308708)
+#pol=municipios %>% filter(ID==2304269)
 
 
 query_on_sf  <- function(pol){
@@ -52,7 +53,7 @@ plot_aggregated_ts  <- function(ts) {
     ts_crunched=left_join(all,ts_clean) %>%
         group_by(id_jrc) %>%
         arrange(ingestion_time) %>%
-        tidyr::fill(area) %>%
+        tidyr::fill(area,source_id,ref_area) %>%
         ungroup %>%
         group_by(ingestion_time) %>%
         summarise(`Acquisition Date`=first(ingestion_time),`Total Area [ha]`=sum(area),`Reference Area`=sum(ref_area),Mission=first(source_id))
