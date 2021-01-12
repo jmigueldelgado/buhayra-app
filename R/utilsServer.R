@@ -15,6 +15,8 @@ query_watermask  <- function(click){
 }
 
 
+click = data.frame(lng=-38.4673190,lat=-5.3255765)
+
 #pol=catchments %>% filter(ID==6121095870)
 #pol=municipios %>% filter(ID==2308708)
 #pol=municipios %>% filter(ID==2304269)
@@ -26,7 +28,7 @@ query_on_sf  <- function(pol){
     con <- dbConnect(drv, dbname='watermasks', host = db_host, port = 5432, user = "sar2water", password = pw)
     rm(pw)
 
-    q_string=paste0("SELECT jrc_demo.id_jrc, ST_area(ST_Transform(jrc_demo.geom,32629)) as ref_area,, ST_Perimeter(ST_Transform(jrc_demo.geom,32629)) as ref_perimeter, demo.area,demo.ingestion_time,demo.source_id FROM jrc_demo RIGHT JOIN demo ON jrc_demo.id_jrc=demo.id_jrc WHERE ST_Intersects(jrc_demo.geom, '",st_as_text(pol$geometry,EWKT=TRUE),"');")
+    q_string=paste0("SELECT jrc_demo.id_jrc, ST_area(ST_Transform(jrc_demo.geom,32629)) as ref_area, ST_Perimeter(ST_Transform(jrc_demo.geom,32629)) as ref_perimeter, demo.area,demo.ingestion_time,demo.source_id FROM jrc_demo RIGHT JOIN demo ON jrc_demo.id_jrc=demo.id_jrc WHERE ST_Intersects(jrc_demo.geom, '",st_as_text(pol$geometry,EWKT=TRUE),"');")
 
     ts <- dbGetQuery(con,q_string)
     dbDisconnect(conn = con)
@@ -35,16 +37,20 @@ query_on_sf  <- function(pol){
 
 
 plot_watermask_ts  <- function(ts) {
-    plt = ts %>%
-        filter(area>0) %>%
-        mutate(alpha_mod=modified_alpha(ref_perimeter,ref_area),K_mod=modified_K(ref_perimeter,ref_area), V=ifelse(area>5000,modified_molle(area,alpha_mod,K_mod),molle(area)),ref_volume=modified_molle(ref_area,alpha_mod,K_mod)) %>%
-        ggplot +
-        geom_point(aes(x=ingestion_time,y=volume/1000000,color=mission_id,shape=pass)) +
-        scale_y_continuous(limits=c(0,1.1*max(ts$ref_volume)/1000000)) +
-        geom_hline(yintercept=ts$ref_volume[1]/1000000,linetype='dashed',color='orange') +
-        xlab("Acquisition Date") +
-        ylab("Measured Volume [hm^3]") +
-        theme(legend.position='bottom')
+        ts_crunched=ts %>%
+            filter(area>0) %>%
+            mutate(alpha_mod=modified_alpha(ref_perimeter,ref_area),K_mod=modified_K(ref_perimeter,ref_area), volume=ifelse(area>5000,modified_molle(area,alpha_mod,K_mod),molle(area)),ref_volume=modified_molle(ref_area,alpha_mod,K_mod)) %>%
+            filter(!is.na(ref_volume))
+
+        volmax=ts_crunched$ref_volume[1]/1000000
+        plt=ts_crunched %>%
+            ggplot +
+            geom_point(aes(x=ingestion_time,y=volume/1000000,color=mission_id,shape=pass)) +
+            scale_y_continuous(limits=c(0,1.1*volmax)) +
+            geom_hline(yintercept=volmax,linetype='dashed',color='orange') +
+            xlab("Acquisition Date") +
+            ylab("Measured Volume [hm^3]") +
+            theme(legend.position='bottom')
     return(plt)
 }
 
@@ -56,9 +62,10 @@ plot_aggregated_ts  <- function(ts) {
         arrange(ingestion_time) %>%
         tidyr::fill(area,source_id,ref_area,ref_perimeter) %>%
         ungroup %>%
-        mutate(alpha_mod=modified_alpha(ref_perimeter,ref_area),K_mod=modified_K(ref_perimeter,ref_area), V=ifelse(area>5000,modified_molle(area,alpha_mod,K_mod),molle(area)),ref_volume=modified_molle(ref_area,alpha_mod,K_mod)) %>%
+        mutate(alpha_mod=modified_alpha(ref_perimeter,ref_area),K_mod=modified_K(ref_perimeter,ref_area), volume=ifelse(area>5000,modified_molle(area,alpha_mod,K_mod),molle(area)),ref_volume=modified_molle(ref_area,alpha_mod,K_mod)) %>%
+        filter(!is.na(ref_volume)) %>%
         group_by(ingestion_time) %>%
-        summarise(`Acquisition Date`=first(ingestion_time),`Measured Volume [hm^3]`=sum(volume)/1000000,`Maximum Volume`=sum(ref_volume)/1000000,Mission=first(source_id))
+        summarise(`Acquisition Date`=first(ingestion_time),`Measured Volume [hm^3]`=sum(volume,na.rm=TRUE)/1000000,`Maximum Volume`=sum(ref_volume,na.rm=TRUE)/1000000,Mission=first(source_id))
 
     plt = ts_crunched %>%
         ggplot +

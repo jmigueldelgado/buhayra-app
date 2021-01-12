@@ -156,7 +156,7 @@ function(input, output, session) {
     }) # end of observer event shape click
     
     output$selected_var <- renderText({  
-        input$mymap_shape_click$id
+        paste(input$mymap_click$lng,input$mymap_click$lat,sep=' | ')
     })
      
 
