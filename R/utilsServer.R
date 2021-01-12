@@ -37,12 +37,13 @@ query_on_sf  <- function(pol){
 plot_watermask_ts  <- function(ts) {
     plt = ts %>%
         filter(area>0) %>%
+        mutate(alpha_mod=modified_alpha(ref_perimeter,ref_area),K_mod=modified_K(ref_perimeter,ref_area), V=ifelse(area>5000,modified_molle(area,alpha_mod,K_mod),molle(area)),ref_volume=modified_molle(ref_area,alpha_mod,K_mod)) %>%
         ggplot +
-        geom_point(aes(x=ingestion_time,y=area/10000,color=mission_id,shape=pass)) +
-        scale_y_continuous(limits=c(0,1.1*max(ts$ref_area)/10000)) +
-        geom_hline(yintercept=ts$ref_area[1]/10000,linetype='dashed',color='orange') +
+        geom_point(aes(x=ingestion_time,y=volume/1000000,color=mission_id,shape=pass)) +
+        scale_y_continuous(limits=c(0,1.1*max(ts$ref_volume)/1000000)) +
+        geom_hline(yintercept=ts$ref_volume[1]/1000000,linetype='dashed',color='orange') +
         xlab("Acquisition Date") +
-        ylab("Area [ha]") +
+        ylab("Measured Volume [hm^3]") +
         theme(legend.position='bottom')
     return(plt)
 }
@@ -53,17 +54,18 @@ plot_aggregated_ts  <- function(ts) {
     ts_crunched=left_join(all,ts_clean) %>%
         group_by(id_jrc) %>%
         arrange(ingestion_time) %>%
-        tidyr::fill(area,source_id,ref_area) %>%
+        tidyr::fill(area,source_id,ref_area,ref_perimeter) %>%
         ungroup %>%
+        mutate(alpha_mod=modified_alpha(ref_perimeter,ref_area),K_mod=modified_K(ref_perimeter,ref_area), V=ifelse(area>5000,modified_molle(area,alpha_mod,K_mod),molle(area)),ref_volume=modified_molle(ref_area,alpha_mod,K_mod)) %>%
         group_by(ingestion_time) %>%
-        summarise(`Acquisition Date`=first(ingestion_time),`Total Area [ha]`=sum(area),`Reference Area`=sum(ref_area),Mission=first(source_id))
+        summarise(`Acquisition Date`=first(ingestion_time),`Measured Volume [hm^3]`=sum(volume)/1000000,`Maximum Volume`=sum(ref_volume)/1000000,Mission=first(source_id))
 
     plt = ts_crunched %>%
         ggplot +
-        geom_point(aes(x=`Acquisition Date`,y=`Total Area [ha]`/10000,color=Mission)) +
-        scale_y_continuous(limits=c(0,1.1*ts_crunched$`Reference Area`[1]/10000)) +
-        geom_hline(yintercept=ts_crunched$`Reference Area`[1]/10000,linetype='dashed',color='orange') +
-        ylab("Total Area [ha]") +
+        geom_point(aes(x=`Acquisition Date`,y=`Measured Volume [hm^3]`,color=Mission)) +
+        scale_y_continuous(limits=c(0,1.1*ts_crunched$`Maximum Volume`[1])) +
+        geom_hline(yintercept=ts_crunched$`Maximum Volume`[1],linetype='dashed',color='orange') +
+        ylab("Measured Volume [hm^3]") +
         theme(legend.position='bottom')
     return(plt)
 }
