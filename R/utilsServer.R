@@ -49,7 +49,7 @@ plot_watermask_ts  <- function(ts) {
             scale_y_continuous(limits=c(0,1.1*volmax)) +
             geom_hline(yintercept=volmax,linetype='dashed',color='orange') +
             xlab("Acquisition Date") +
-            ylab(expression(paste0("Measured Volume [",hm^3,"]"))) +
+            ylab(expression(~Measured~Volume~'['*hm^3*']')) +
             theme(legend.position='bottom')
     return(plt)
 }
@@ -72,7 +72,7 @@ plot_aggregated_ts  <- function(ts) {
         geom_point(aes(x=`Acquisition Date`,y=`Measured Volume [hm^3]`,color=Mission)) +
         scale_y_continuous(limits=c(0,1.1*ts_crunched$`Maximum Volume`[1])) +
         geom_hline(yintercept=ts_crunched$`Maximum Volume`[1],linetype='dashed',color='orange') +
-        ylab(expression(paste0("Measured Volume [",hm^3,"]"))) +
+        ylab(expression(~Measured~Volume~'['*hm^3*']')) +
         theme(legend.position='bottom')
     return(plt)
 }
