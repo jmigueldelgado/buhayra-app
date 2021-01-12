@@ -41,10 +41,13 @@ function(input, output, session) {
 
 
     observe({
-        if(input$datasets!='None') {
-            proxy = leafletProxy("mymap",data = overlay_layers[[input$datasets]]) %>%
+ #       if(input$datasets!='None') {
+        proxy = leafletProxy("mymap",data = overlay_layers[[input$datasets]]) %>%
                                        clearPopups() %>%
                                        clearShapes()
+                                        #        }
+        if(input$datasets=='None'){
+            proxy
         }
 
         if(input$datasets=='Municipalities'){
