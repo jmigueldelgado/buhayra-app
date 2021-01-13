@@ -121,7 +121,7 @@ function(input, output, session) {
             else
             {
                 output$tsVol <- renderPlot({
-                    plot_watermask_ts(ts)
+                    plot_watermask_ts(ts,10000*input$thresh)
                 })
                 
                 text= paste0("ID: ",ts$id_jrc[1],"<br>",ts %>%
@@ -152,14 +152,14 @@ function(input, output, session) {
             else
         {
             output$tsVol <- renderPlot({
-                plot_aggregated_ts(ts)
+                plot_aggregated_ts(ts,10000*input$thresh)
             })
         }
             
     }) # end of observer event shape click
     
     output$selected_var <- renderText({  
-        paste(input$mymap_click$lng,input$mymap_click$lat,sep=' | ')
+        paste(input$mymap_shape_click$id,input$mymap_click$lng,input$mymap_click$lat,sep=' | ')
     })
      
 

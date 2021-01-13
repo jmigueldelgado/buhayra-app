@@ -10,12 +10,13 @@ vars=c('None','Municipalities','Catchments')
 
 panel1 = absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
         draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
-        width = 330, height = "auto",
+        width = 400, height = "auto",
         h2("Water storage dynamics"),
         p("Click on a reservoir or overlay to obtain a time-series"),
         selectInput("datasets", "Overlays", vars),
         plotOutput('tsVol'),
-#        checkboxInput("municipios", "Overlay Municipalities", FALSE),
+        sliderInput("thresh", "Reservoir area threshold [ha] for plotting:",
+                    min = 0, max = 1000, value = 1000,step=100),
         textOutput("selected_var")
         )
 
