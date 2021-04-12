@@ -9,7 +9,7 @@ library(sf)
 query_watermask  <- function(click){
     source("/srv/shiny-server/buhayra-app/pw.R")
     drv <- dbDriver("PostgreSQL")
-    con <- dbConnect(drv, dbname='watermasks', host = db_host, port = 5432, user = "sar2water", password = pw)
+    con <- dbConnect(drv, dbname='watermasks', host = db_host, port = 5432, user = "readonly", password = pw)
     rm(pw)
     ts <- dbGetQuery(con, paste0("SELECT jrc_demo.id_jrc, ST_area(ST_Transform(jrc_demo.geom,32629)) as ref_area, ST_Perimeter(ST_Transform(jrc_demo.geom,32629)) as ref_perimeter, demo.area,demo.ingestion_time,demo.source_id FROM jrc_demo RIGHT JOIN demo ON jrc_demo.id_jrc=demo.id_jrc WHERE ST_Contains(jrc_demo.geom, ST_SetSRID(ST_Point(",click$lng,",",click$lat,"),4326))"))
     dbDisconnect(conn = con)
@@ -26,7 +26,7 @@ query_watermask  <- function(click){
 query_on_sf  <- function(pol){
     source("/srv/shiny-server/buhayra-app/pw.R")
     drv <- dbDriver("PostgreSQL")
-    con <- dbConnect(drv, dbname='watermasks', host = db_host, port = 5432, user = "sar2water", password = pw)
+    con <- dbConnect(drv, dbname='watermasks', host = db_host, port = 5432, user = "readonly", password = pw)
     rm(pw)
 
     q_string=paste0("SELECT jrc_demo.id_jrc, ST_area(ST_Transform(jrc_demo.geom,32629)) as ref_area, ST_Perimeter(ST_Transform(jrc_demo.geom,32629)) as ref_perimeter, demo.area,demo.ingestion_time,demo.source_id FROM jrc_demo RIGHT JOIN demo ON jrc_demo.id_jrc=demo.id_jrc WHERE ST_Intersects(jrc_demo.geom, '",st_as_text(pol$geometry,EWKT=TRUE),"');")
