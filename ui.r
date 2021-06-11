@@ -16,7 +16,7 @@ panel1 = absolutePanel(id = "controls", class = "panel panel-default", fixed = T
         selectInput("datasets", "Overlays", vars),
         plotOutput('tsVol'),
         sliderInput("thresh", "Reservoir area threshold [ha] for plotting:",
-                    min = 0, max = 1000, value = 1000,step=100),
+                    min = 0, max = 100000, value = 100000,step=10000),
         textOutput("selected_var")
         )
 
